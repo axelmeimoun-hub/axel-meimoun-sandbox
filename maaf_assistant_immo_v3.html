@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAAF — Assistant Immobilier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#f0eeeb;color:#1a1a1a;min-height:100vh;}
+
+/* LAYOUT */
+.page{max-width:900px;margin:0 auto;padding:2.5rem 2rem 5rem;}
+
+/* HERO */
+.hero{
+  background:#0F6E56;
+  border-radius:20px;
+  padding:2.25rem 2.75rem;
+  margin-bottom:14px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:2rem;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';
+  position:absolute;
+  top:-60px;right:-60px;
+  width:240px;height:240px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.04);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-80px;right:80px;
+  width:180px;height:180px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.03);
+  pointer-events:none;
+}
+.hero-greeting{
+  font-family:'Syne',sans-serif;
+  font-size:11px;font-weight:600;
+  color:#9FE1CB;letter-spacing:0.08em;
+  text-transform:uppercase;margin-bottom:8px;
+}
+.hero-title{
+  font-family:'Syne',sans-serif;
+  font-size:28px;font-weight:700;
+  color:#fff;line-height:1.2;margin-bottom:6px;
+}
+.hero-sub{font-size:13px;color:#9FE1CB;line-height:1.6;}
+.hero-right{text-align:right;flex-shrink:0;position:relative;z-index:1;}
+.hero-right-label{font-size:11px;color:#9FE1CB;margin-bottom:4px;letter-spacing:0.03em;}
+.hero-right-val{
+  font-family:'Syne',sans-serif;
+  font-size:36px;font-weight:700;color:#fff;line-height:1;
+}
+.hero-right-sub{font-size:11px;color:#9FE1CB;margin-top:4px;}
+
+/* TABS CARD */
+.tabs-card{
+  background:#fff;
+  border-radius:18px;
+  border:0.5px solid #e8e8e8;
+  overflow:hidden;
+}
+
+.tabs-nav{
+  display:flex;
+  border-bottom:0.5px solid #f0f0f0;
+  background:#fafaf9;
+}
+.tab{
+  flex:1;
+  padding:1rem 1.5rem;
+  cursor:pointer;
+  border-right:0.5px solid #f0f0f0;
+  transition:background 0.2s;
+  position:relative;
+  user-select:none;
+}
+.tab:last-child{border-right:none;}
+.tab:hover{background:#f5f5f4;}
+.tab.active{background:#fff;}
+.tab-label{
+  font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:600;
+  color:#bbb;
+  transition:color 0.2s;
+}
+.tab.active .tab-label{color:#1a1a1a;}
+.tab-count{
+  display:inline-block;
+  font-size:11px;font-weight:600;
+  background:#f0f0f0;color:#999;
+  border-radius:999px;
+  padding:1px 8px;margin-left:6px;
+  transition:background 0.2s,color 0.2s;
+  font-family:'DM Sans',sans-serif;
+}
+.tab.active .tab-count{background:#E6F3F5;color:#0F6E56;}
+.tab-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  height:2px;background:transparent;
+  transition:background 0.2s;
+}
+.tab.active .tab-bar{background:#0F6E56;}
+
+/* PROJETS LIST */
+.projets-list{
+  padding:1.25rem;
+  display:flex;flex-direction:column;gap:8px;
+}
+
+/* PROJET ROW */
+.projet-row{
+  border:0.5px solid #ebebeb;
+  border-radius:14px;
+  overflow:hidden;
+  transition:border-color 0.2s;
+}
+.projet-row.open{border-color:#b8dde3;}
+
+.projet-header{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:1rem 1.25rem;
+  cursor:pointer;
+  background:#fafaf9;
+  transition:background 0.15s;
+  user-select:none;
+}
+.projet-header:hover{background:#f5f5f3;}
+.projet-row.open .projet-header{background:#eef8f8;}
+
+.projet-header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.projet-name{
+  font-family:'Syne',sans-serif;
+  font-size:14px;font-weight:600;color:#1a1a1a;
+  transition:color 0.2s;
+}
+.projet-row.open .projet-name{color:#0F6E56;}
+.projet-date{font-size:11px;color:#bbb;font-weight:400;}
+.projet-recent-badge{
+  font-size:10px;font-weight:600;
+  background:#0F6E56;color:#fff;
+  border-radius:999px;padding:2px 9px;
+  letter-spacing:0.03em;
+}
+.projet-header-right{display:flex;align-items:center;gap:6px;}
+
+.delete-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:8px;
+  cursor:pointer;transition:background 0.15s;
+  color:#ddd;
+}
+.delete-btn:hover{background:#fef2f2;color:#E24B4A;}
+.delete-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;}
+
+.projet-chev{
+  font-size:18px;color:#ccc;
+  transition:transform 0.25s,color 0.2s;
+  line-height:1;
+}
+.projet-row.open .projet-chev{transform:rotate(180deg);color:#0F6E56;}
+
+/* PROJET BODY */
+.projet-body{
+  background:#fff;
+  border-top:0.5px solid #e8f4f6;
+  display:none;
+}
+.projet-body.visible{display:block;}
+
+/* RÉCAP */
+.recap-section{
+  padding:1.25rem 1.5rem;
+  border-bottom:0.5px solid #f5f5f5;
+}
+.recap-toggle{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+  user-select:none;
+}
+.recap-toggle-left{display:flex;align-items:center;gap:8px;}
+.recap-toggle-icon{
+  width:26px;height:26px;border-radius:7px;
+  background:#E6F3F5;
+  display:flex;align-items:center;justify-content:center;
+}
+.recap-toggle-icon svg{width:12px;height:12px;stroke:#0F6E56;fill:none;stroke-width:1.5;}
+.recap-toggle-label{
+  font-family:'Syne',sans-serif;
+  font-size:12px;font-weight:600;color:#555;
+}
+.recap-toggle-chev{
+  font-size:15px;color:#ccc;
+  transition:transform 0.2s;
+  line-height:1;
+}
+.recap-toggle-chev.open{transform:rotate(180deg);}
+
+.recap-content{margin-top:1rem;}
+.recap-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0;
+}
+.recap-item{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:9px 0;
+  border-bottom:0.5px solid #f8f8f8;
+}
+.recap-item:nth-last-child(-n+2){border-bottom:none;}
+.recap-item-label{font-size:11px;color:#999;}
+.recap-item-right{display:flex;align-items:center;gap:7px;}
+.recap-item-val{font-size:12px;font-weight:500;color:#1a1a1a;}
+.recap-edit{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:10px;color:#0F6E56;
+  background:#E6F3F5;border-radius:6px;
+  padding:2px 7px;cursor:pointer;
+  transition:background 0.15s;
+  font-weight:500;
+}
+.recap-edit:hover{background:#cce9ee;}
+.recap-edit svg{width:9px;height:9px;stroke:#0F6E56;fill:none;stroke-width:1.5;}
+
+/* PHASES */
+.phases-nav{
+  display:flex;
+  border-bottom:0.5px solid #f0f0f0;
+  background:#fafaf9;
+}
+.phase-tab{
+  flex:1;padding:0.85rem 1rem;cursor:pointer;
+  border-right:0.5px solid #f0f0f0;
+  transition:background 0.15s;
+  position:relative;
+  user-select:none;
+}
+.phase-tab:last-child{border-right:none;}
+.phase-tab:hover{background:#f5f5f3;}
+.phase-tab.active{background:#fff;}
+.phase-tab-num{
+  font-size:10px;font-weight:600;color:#ccc;
+  letter-spacing:0.06em;text-transform:uppercase;
+  margin-bottom:2px;
+  font-family:'DM Sans',sans-serif;
+  transition:color 0.2s;
+}
+.phase-tab.active .phase-tab-num{color:#0F6E56;}
+.phase-tab-label{
+  font-size:12px;font-weight:500;color:#bbb;
+  line-height:1.3;transition:color 0.2s;
+}
+.phase-tab.active .phase-tab-label{color:#1a1a1a;}
+.phase-tab-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  height:2px;background:transparent;
+}
+.phase-tab.active .phase-tab-bar{background:#0F6E56;}
+
+/* PHASES BODY */
+.phases-body{padding:1.5rem;}
+
+.section-lbl{
+  font-family:'Syne',sans-serif;
+  font-size:10px;font-weight:600;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:#bbb;margin-bottom:0.85rem;
+}
+
+/* OFFRES */
+.offres-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;margin-bottom:1.5rem;
+}
+.offre{
+  background:#E6F3F5;
+  border:0.5px solid #c8dfe3;
+  border-radius:12px;padding:1.1rem;
+  cursor:pointer;
+  transition:border-color 0.15s,background 0.15s;
+  display:flex;flex-direction:column;gap:7px;
+}
+.offre:hover{border-color:#0F6E56;background:#daeef1;}
+.offre-top{display:flex;align-items:center;justify-content:space-between;}
+.offre-icon{
+  width:30px;height:30px;border-radius:8px;
+  background:#fff;border:0.5px solid #c8dfe3;
+  display:flex;align-items:center;justify-content:center;
+}
+.offre-icon svg{width:13px;height:13px;stroke:#0F6E56;fill:none;stroke-width:1.5;}
+.offre-arrow{font-size:16px;color:#9FE1CB;line-height:1;}
+.offre:hover .offre-arrow{color:#0F6E56;}
+.offre-name{font-size:12px;font-weight:600;color:#085041;font-family:'Syne',sans-serif;}
+.offre-desc{font-size:11px;color:#4a7a85;line-height:1.4;}
+
+/* INNER DIVIDER */
+.inner-div{
+  border:none;border-top:0.5px solid #f2f2f2;
+  margin:0 0 1.25rem;
+}
+
+/* LIENS */
+.liens-list{display:flex;flex-direction:column;gap:1px;}
+.lien{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:9px;
+  cursor:pointer;transition:background 0.15s;
+}
+.lien:hover{background:#f7f7f5;}
+.lien-icon{
+  width:28px;height:28px;border-radius:8px;
+  background:#f5f5f3;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.lien-icon svg{width:12px;height:12px;stroke:#888;fill:none;stroke-width:1.5;}
+.lien-label{font-size:12px;color:#555;flex:1;transition:color 0.15s;}
+.lien:hover .lien-label{color:#1a1a1a;}
+.lien-arrow{font-size:14px;color:#ddd;transition:color 0.15s;}
+.lien:hover .lien-arrow{color:#0F6E56;}
+
+/* ADD PROJET */
+.add-projet{
+  display:flex;align-items:center;gap:9px;
+  padding:0.85rem 1rem;
+  border:0.5px dashed #c8dfe3;
+  border-radius:11px;cursor:pointer;
+  transition:border-color 0.15s,background 0.15s;
+  background:transparent;
+  margin-top:2px;
+}
+.add-projet:hover{border-color:#0F6E56;background:#f7fcfd;}
+.add-plus{
+  width:26px;height:26px;border-radius:50%;
+  background:#E6F3F5;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:#0F6E56;
+  line-height:1;font-weight:300;
+  font-family:'DM Sans',sans-serif;
+}
+.add-lbl{font-size:12px;color:#0F6E56;font-weight:500;}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.projet-body.visible{animation:fadeIn 0.2s ease;}
+.recap-content{animation:fadeIn 0.15s ease;}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="hero-greeting">Assistant immobilier</div>
+      <div class="hero-title">Bonjour, Axel</div>
+      <div class="hero-sub">Laissez-vous guider pour gagner du temps<br>et faire les bons choix à chaque étape.</div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-right-label">Projets actifs</div>
+      <div class="hero-right-val">13</div>
+      <div class="hero-right-sub">achat · vente · location</div>
+    </div>
+  </div>
+
+  <!-- TABS CARD -->
+  <div class="tabs-card">
+    <div class="tabs-nav">
+      <div class="tab active" onclick="switchTab('achat', this)">
+        <span class="tab-label">Projet achat</span>
+        <span class="tab-count">9</span>
+        <div class="tab-bar"></div>
+      </div>
+      <div class="tab" onclick="switchTab('vente', this)">
+        <span class="tab-label">Projet vente</span>
+        <span class="tab-count">3</span>
+        <div class="tab-bar"></div>
+      </div>
+      <div class="tab" onclick="switchTab('location', this)">
+        <span class="tab-label">Projet location</span>
+        <span class="tab-count">1</span>
+        <div class="tab-bar"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB ACHAT ===== -->
+    <div class="projets-list" id="tab-achat">
+
+      <!-- PROJET 1 — ouvert par défaut -->
+      <div class="projet-row open" id="proj-1">
+        <div class="projet-header" onclick="toggleProjet('proj-1')">
+          <div class="projet-header-left">
+            <span class="projet-name">sfkjn</span>
+            <span class="projet-date">— Modifié le 21/04/2026</span>
+            <span class="projet-recent-badge">Récent</span>
+          </div>
+          <div class="projet-header-right">
+            <div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            </div>
+            <div class="projet-chev">⌄</div>
+          </div>
+        </div>
+        <div class="projet-body visible" id="body-proj-1">
+
+          <!-- RÉCAP -->
+          <div class="recap-section">
+            <div class="recap-toggle" onclick="toggleRecap('rc-proj-1', 'rchev-proj-1')">
+              <div class="recap-toggle-left">
+                <div class="recap-toggle-icon">
+                  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <span class="recap-toggle-label">Récapitulatif du projet</span>
+              </div>
+              <div class="recap-toggle-chev open" id="rchev-proj-1">⌄</div>
+            </div>
+            <div class="recap-content" id="rc-proj-1">
+              <div class="recap-grid">
+                <div class="recap-item">
+                  <div class="recap-item-label">Nom du projet</div>
+                  <div class="recap-item-right">
+                    <div class="recap-item-val">sfkjn</div>
+                    <div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div>
+                  </div>
+                </div>
+                <div class="recap-item">
+                  <div class="recap-item-label">Date estimée</div>
+                  <div class="recap-item-right">
+                    <div class="recap-item-val">Janvier 2026</div>
+                    <div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div>
+                  </div>
+                </div>
+                <div class="recap-item">
+                  <div class="recap-item-label">Objectif</div>
+                  <div class="recap-item-right">
+                    <div class="recap-item-val">Résidence principale</div>
+                    <div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div>
+                  </div>
+                </div>
+                <div class="recap-item">
+                  <div class="recap-item-label">Premier achat</div>
+                  <div class="recap-item-right">
+                    <div class="recap-item-val">Oui</div>
+                    <div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PHASES -->
+          <div class="phases-nav" id="pnav-proj-1">
+            <div class="phase-tab" onclick="switchPhase('proj-1', 0, this)">
+              <div class="phase-tab-num">Phase 1</div>
+              <div class="phase-tab-label">Je définis mon projet</div>
+              <div class="phase-tab-bar"></div>
+            </div>
+            <div class="phase-tab active" onclick="switchPhase('proj-1', 1, this)">
+              <div class="phase-tab-num">Phase 2</div>
+              <div class="phase-tab-label">Je cherche et j'achète</div>
+              <div class="phase-tab-bar"></div>
+            </div>
+            <div class="phase-tab" onclick="switchPhase('proj-1', 2, this)">
+              <div class="phase-tab-num">Phase 3</div>
+              <div class="phase-tab-label">Je m'installe</div>
+              <div class="phase-tab-bar"></div>
+            </div>
+          </div>
+
+          <div class="phases-body">
+            <div class="section-lbl">Offres MAAF pour cette phase</div>
+            <div class="offres-grid">
+              <div class="offre">
+                <div class="offre-top">
+                  <div class="offre-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                  <div class="offre-arrow">›</div>
+                </div>
+                <div class="offre-name">Recherche de bien</div>
+                <div class="offre-desc">Nos partenaires pour trouver votre logement</div>
+              </div>
+              <div class="offre">
+                <div class="offre-top">
+                  <div class="offre-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                  <div class="offre-arrow">›</div>
+                </div>
+                <div class="offre-name">Assurance habitation</div>
+                <div class="offre-desc">Préparez votre couverture avant la signature</div>
+              </div>
+              <div class="offre">
+                <div class="offre-top">
+                  <div class="offre-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+                  <div class="offre-arrow">›</div>
+                </div>
+                <div class="offre-name">Simulation de prêt</div>
+                <div class="offre-desc">Estimez votre capacité d'emprunt</div>
+              </div>
+            </div>
+            <hr class="inner-div">
+            <div class="section-lbl">Tous les accompagnements</div>
+            <div class="liens-list">
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="lien-label">Rechercher un bien</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="lien-label">Visiter un bien</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></div><div class="lien-label">Simuler le coût des biens visités</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="lien-label">Assurer mon logement et mon prêt</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="lien-label">Sécuriser mon projet d'achat</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="lien-label">Rechercher un financement</div><div class="lien-arrow">›</div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PROJETS FERMÉS -->
+      <div class="projet-row" id="proj-2">
+        <div class="projet-header" onclick="toggleProjet('proj-2')">
+          <div class="projet-header-left">
+            <span class="projet-name">marseille</span>
+            <span class="projet-date">— Créé le 01/04/2026</span>
+          </div>
+          <div class="projet-header-right">
+            <div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
+            <div class="projet-chev">⌄</div>
+          </div>
+        </div>
+        <div class="projet-body" id="body-proj-2">
+          <div class="recap-section">
+            <div class="recap-toggle" onclick="toggleRecap('rc-proj-2','rchev-proj-2')">
+              <div class="recap-toggle-left"><div class="recap-toggle-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="recap-toggle-label">Récapitulatif du projet</span></div>
+              <div class="recap-toggle-chev open" id="rchev-proj-2">⌄</div>
+            </div>
+            <div class="recap-content" id="rc-proj-2">
+              <div class="recap-grid">
+                <div class="recap-item"><div class="recap-item-label">Nom du projet</div><div class="recap-item-right"><div class="recap-item-val">marseille</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Date estimée</div><div class="recap-item-right"><div class="recap-item-val">Juin 2026</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Objectif</div><div class="recap-item-right"><div class="recap-item-val">Résidence secondaire</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Premier achat</div><div class="recap-item-right"><div class="recap-item-val">Non</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="phases-nav" id="pnav-proj-2">
+            <div class="phase-tab active" onclick="switchPhase('proj-2',0,this)"><div class="phase-tab-num">Phase 1</div><div class="phase-tab-label">Je définis mon projet</div><div class="phase-tab-bar"></div></div>
+            <div class="phase-tab" onclick="switchPhase('proj-2',1,this)"><div class="phase-tab-num">Phase 2</div><div class="phase-tab-label">Je cherche et j'achète</div><div class="phase-tab-bar"></div></div>
+            <div class="phase-tab" onclick="switchPhase('proj-2',2,this)"><div class="phase-tab-num">Phase 3</div><div class="phase-tab-label">Je m'installe</div><div class="phase-tab-bar"></div></div>
+          </div>
+          <div class="phases-body">
+            <div class="section-lbl">Offres MAAF pour cette phase</div>
+            <div class="offres-grid">
+              <div class="offre"><div class="offre-top"><div class="offre-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20"/></svg></div><div class="offre-arrow">›</div></div><div class="offre-name">Découvrir un quartier</div><div class="offre-desc">Explorez les quartiers de Marseille</div></div>
+              <div class="offre"><div class="offre-top"><div class="offre-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="offre-arrow">›</div></div><div class="offre-name">Assurance habitation</div><div class="offre-desc">Protégez votre future résidence</div></div>
+              <div class="offre"><div class="offre-top"><div class="offre-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="offre-arrow">›</div></div><div class="offre-name">Simulation de prêt</div><div class="offre-desc">Estimez votre capacité d'emprunt</div></div>
+            </div>
+            <hr class="inner-div">
+            <div class="section-lbl">Tous les accompagnements</div>
+            <div class="liens-list">
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="lien-label">Préparer mon projet d'achat</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="lien-label">Définir mes critères de recherche</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="lien-label">Définir ma capacité d'achat</div><div class="lien-arrow">›</div></div>
+              <div class="lien"><div class="lien-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="lien-label">Simuler mon assurance de prêt</div><div class="lien-arrow">›</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="projet-row" id="proj-3">
+        <div class="projet-header" onclick="toggleProjet('proj-3')">
+          <div class="projet-header-left"><span class="projet-name">sd</span><span class="projet-date">— Créé le 02/03/2026</span></div>
+          <div class="projet-header-right"><div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="projet-chev">⌄</div></div>
+        </div>
+        <div class="projet-body" id="body-proj-3">
+          <div class="phases-body" style="padding:1.25rem 1.5rem;"><div class="section-lbl">Objectif · Premier achat · Créé le 02/03/2026</div></div>
+        </div>
+      </div>
+
+      <div class="projet-row" id="proj-4">
+        <div class="projet-header" onclick="toggleProjet('proj-4')">
+          <div class="projet-header-left"><span class="projet-name">loijfkn</span><span class="projet-date">— Créé le 02/03/2026</span></div>
+          <div class="projet-header-right"><div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="projet-chev">⌄</div></div>
+        </div>
+        <div class="projet-body" id="body-proj-4">
+          <div class="phases-body" style="padding:1.25rem 1.5rem;"><div class="section-lbl">Investissement locatif · Créé le 02/03/2026</div></div>
+        </div>
+      </div>
+
+      <div class="projet-row" id="proj-5">
+        <div class="projet-header" onclick="toggleProjet('proj-5')">
+          <div class="projet-header-left"><span class="projet-name">Lorem</span><span class="projet-date">— Créé le 11/01/2026</span></div>
+          <div class="projet-header-right"><div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="projet-chev">⌄</div></div>
+        </div>
+        <div class="projet-body" id="body-proj-5">
+          <div class="phases-body" style="padding:1.25rem 1.5rem;"><div class="section-lbl">Résidence principale · Créé le 11/01/2026</div></div>
+        </div>
+      </div>
+
+      <div class="add-projet">
+        <div class="add-plus">+</div>
+        <div class="add-lbl">Ajouter un projet achat</div>
+      </div>
+    </div>
+
+    <!-- ===== TAB VENTE ===== -->
+    <div class="projets-list" id="tab-vente" style="display:none;">
+      <div class="projet-row open" id="proj-v1">
+        <div class="projet-header" onclick="toggleProjet('proj-v1')">
+          <div class="projet-header-left"><span class="projet-name">Appartement Lyon</span><span class="projet-date">— Créé le 10/03/2026</span><span class="projet-recent-badge">Récent</span></div>
+          <div class="projet-header-right"><div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="projet-chev">⌄</div></div>
+        </div>
+        <div class="projet-body visible" id="body-proj-v1">
+          <div class="recap-section">
+            <div class="recap-toggle" onclick="toggleRecap('rc-proj-v1','rchev-proj-v1')">
+              <div class="recap-toggle-left"><div class="recap-toggle-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="recap-toggle-label">Récapitulatif du projet</span></div>
+              <div class="recap-toggle-chev open" id="rchev-proj-v1">⌄</div>
+            </div>
+            <div class="recap-content" id="rc-proj-v1">
+              <div class="recap-grid">
+                <div class="recap-item"><div class="recap-item-label">Nom du projet</div><div class="recap-item-right"><div class="recap-item-val">Appartement Lyon</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Date estimée</div><div class="recap-item-right"><div class="recap-item-val">Septembre 2026</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Type de bien</div><div class="recap-item-right"><div class="recap-item-val">Appartement 3 pièces</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Motif de vente</div><div class="recap-item-right"><div class="recap-item-val">Déménagement</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="phases-nav">
+            <div class="phase-tab active"><div class="phase-tab-num">Phase 1</div><div class="phase-tab-label">Je prépare la vente</div><div class="phase-tab-bar"></div></div>
+            <div class="phase-tab"><div class="phase-tab-num">Phase 2</div><div class="phase-tab-label">Je vends</div><div class="phase-tab-bar"></div></div>
+            <div class="phase-tab"><div class="phase-tab-num">Phase 3</div><div class="phase-tab-label">Après la vente</div><div class="phase-tab-bar"></div></div>
+          </div>
+          <div class="phases-body">
+            <div class="section-lbl">Offres MAAF pour cette phase</div>
+            <div class="offres-grid">
+              <div class="offre"><div class="offre-top"><div class="offre-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="offre-arrow">›</div></div><div class="offre-name">Diagnostic immobilier</div><div class="offre-desc">Obligations légales avant la mise en vente</div></div>
+              <div class="offre"><div class="offre-top"><div class="offre-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="offre-arrow">›</div></div><div class="offre-name">Estimation du bien</div><div class="offre-desc">Valorisez votre bien au juste prix</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="projet-row" id="proj-v2"><div class="projet-header" onclick="toggleProjet('proj-v2')"><div class="projet-header-left"><span class="projet-name">Maison Bordeaux</span><span class="projet-date">— Créé le 05/02/2026</span></div><div class="projet-header-right"><div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="projet-chev">⌄</div></div></div><div class="projet-body" id="body-proj-v2"><div class="phases-body" style="padding:1.25rem 1.5rem;"><div class="section-lbl">Créé le 05/02/2026</div></div></div></div>
+      <div class="projet-row" id="proj-v3"><div class="projet-header" onclick="toggleProjet('proj-v3')"><div class="projet-header-left"><span class="projet-name">Studio Paris</span><span class="projet-date">— Créé le 12/01/2026</span></div><div class="projet-header-right"><div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="projet-chev">⌄</div></div></div><div class="projet-body" id="body-proj-v3"><div class="phases-body" style="padding:1.25rem 1.5rem;"><div class="section-lbl">Créé le 12/01/2026</div></div></div></div>
+      <div class="add-projet"><div class="add-plus">+</div><div class="add-lbl">Ajouter un projet vente</div></div>
+    </div>
+
+    <!-- ===== TAB LOCATION ===== -->
+    <div class="projets-list" id="tab-location" style="display:none;">
+      <div class="projet-row open" id="proj-l1">
+        <div class="projet-header" onclick="toggleProjet('proj-l1')">
+          <div class="projet-header-left"><span class="projet-name">Appartement Nice</span><span class="projet-date">— Créé le 15/04/2026</span><span class="projet-recent-badge">Récent</span></div>
+          <div class="projet-header-right"><div class="delete-btn" onclick="event.stopPropagation(); confirmDelete(this)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="projet-chev">⌄</div></div>
+        </div>
+        <div class="projet-body visible" id="body-proj-l1">
+          <div class="recap-section">
+            <div class="recap-toggle" onclick="toggleRecap('rc-proj-l1','rchev-proj-l1')">
+              <div class="recap-toggle-left"><div class="recap-toggle-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="recap-toggle-label">Récapitulatif du projet</span></div>
+              <div class="recap-toggle-chev open" id="rchev-proj-l1">⌄</div>
+            </div>
+            <div class="recap-content" id="rc-proj-l1">
+              <div class="recap-grid">
+                <div class="recap-item"><div class="recap-item-label">Nom du projet</div><div class="recap-item-right"><div class="recap-item-val">Appartement Nice</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Type de location</div><div class="recap-item-right"><div class="recap-item-val">Meublée</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Date d'entrée</div><div class="recap-item-right"><div class="recap-item-val">Juillet 2026</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+                <div class="recap-item"><div class="recap-item-label">Budget mensuel</div><div class="recap-item-right"><div class="recap-item-val">1 200 € / mois</div><div class="recap-edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="phases-nav">
+            <div class="phase-tab active"><div class="phase-tab-num">Phase 1</div><div class="phase-tab-label">Je cherche</div><div class="phase-tab-bar"></div></div>
+            <div class="phase-tab"><div class="phase-tab-num">Phase 2</div><div class="phase-tab-label">Je visite et loue</div><div class="phase-tab-bar"></div></div>
+            <div class="phase-tab"><div class="phase-tab-num">Phase 3</div><div class="phase-tab-label">Je m'installe</div><div class="phase-tab-bar"></div></div>
+          </div>
+          <div class="phases-body">
+            <div class="section-lbl">Offres MAAF pour cette phase</div>
+            <div class="offres-grid">
+              <div class="offre"><div class="offre-top"><div class="offre-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="offre-arrow">›</div></div><div class="offre-name">Assurance loyer impayé</div><div class="offre-desc">Protégez vos revenus locatifs</div></div>
+              <div class="offre"><div class="offre-top"><div class="offre-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="offre-arrow">›</div></div><div class="offre-name">Assurance habitation</div><div class="offre-desc">Pour votre future location</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="add-projet"><div class="add-plus">+</div><div class="add-lbl">Ajouter un projet location</div></div>
+    </div>
+
+  </div><!-- /tabs-card -->
+
+</div><!-- /page -->
+
+<script>
+let openProjets = { achat: 'proj-1', vente: 'proj-v1', location: 'proj-l1' };
+let currentTab = 'achat';
+
+function toggleProjet(id) {
+  const body = document.getElementById('body-' + id);
+  const row = document.getElementById(id);
+  if (!body) return;
+
+  const currentOpen = openProjets[currentTab];
+  if (currentOpen && currentOpen !== id) {
+    const prevBody = document.getElementById('body-' + currentOpen);
+    const prevRow = document.getElementById(currentOpen);
+    if (prevBody) prevBody.classList.remove('visible');
+    if (prevRow) prevRow.classList.remove('open');
+  }
+
+  const isOpen = body.classList.contains('visible');
+  body.classList.toggle('visible', !isOpen);
+  row.classList.toggle('open', !isOpen);
+  openProjets[currentTab] = isOpen ? null : id;
+}
+
+function toggleRecap(contentId, chevId) {
+  const content = document.getElementById(contentId);
+  const chev = document.getElementById(chevId);
+  if (!content) return;
+  const isVisible = content.style.display !== 'none';
+  content.style.display = isVisible ? 'none' : 'block';
+  if (chev) chev.classList.toggle('open', !isVisible);
+}
+
+function switchPhase(projId, idx, el) {
+  const nav = document.getElementById('pnav-' + projId);
+  if (!nav) return;
+  nav.querySelectorAll('.phase-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function switchTab(type, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = type;
+  ['achat', 'vente', 'location'].forEach(t => {
+    const panel = document.getElementById('tab-' + t);
+    if (panel) panel.style.display = t === type ? 'flex' : 'none';
+    if (panel) panel.style.flexDirection = 'column';
+  });
+}
+
+function confirmDelete(btn) {
+  const row = btn.closest('.projet-row');
+  const name = row.querySelector('.projet-name')?.textContent || 'ce projet';
+  if (confirm(`Supprimer le projet "${name}" ?`)) {
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(8px)';
+    row.style.transition = 'opacity 0.2s, transform 0.2s';
+    setTimeout(() => row.remove(), 200);
+  }
+}
+</script>
+</body>
+</html>
