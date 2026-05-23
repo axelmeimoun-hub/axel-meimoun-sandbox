@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Schéma circulaire</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #0d0d0d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .container {
+    width: min(90vw, 90vh);
+    height: min(90vw, 90vh);
+    position: relative;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  @property --angle1 { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  @property --angle2 { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  @property --angle3 { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+  @keyframes spin1 { to { --angle1: 360deg; } }
+  @keyframes spin2 { to { --angle2: 360deg; } }
+  @keyframes spin3 { to { --angle3: 360deg; } }
+
+  .ring1 { animation: spin1 6s linear infinite; }
+  .ring2 { animation: spin2 6s linear infinite; animation-delay: -2s; }
+  .ring3 { animation: spin3 6s linear infinite; animation-delay: -4s; }
+</style>
+</head>
+<body>
+<div class="container">
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+
+    <!-- Background glow -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a2a3a" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0d0d0d" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Node fill -->
+    <radialGradient id="nodeFill" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#1e3a5a"/>
+      <stop offset="100%" stop-color="#0a1520"/>
+    </radialGradient>
+
+    <!-- Arrow gradients -->
+    <linearGradient id="ag1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7eb8e8" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#7eb8e8" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="ag2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7eb8e8" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#7eb8e8" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="ag3" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#7eb8e8" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#7eb8e8" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <!-- Arrowheads -->
+    <marker id="ah1" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0,1 L6,3.5 L0,6" fill="none" stroke="rgba(126,184,232,0.7)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="ah2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0,1 L6,3.5 L0,6" fill="none" stroke="rgba(126,184,232,0.7)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="ah3" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0,1 L6,3.5 L0,6" fill="none" stroke="rgba(126,184,232,0.7)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+
+    <!-- Glow filter for dots -->
+    <filter id="dotGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Soft shadow for nodes -->
+    <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Conic shimmer via clip -->
+    <!-- We'll fake it with a rotating gradient stroke circle -->
+
+  </defs>
+
+  <!-- Background radial glow -->
+  <circle cx="250" cy="250" r="220" fill="url(#bgGlow)"/>
+
+  <!-- Orbit ring (dashed, subtle) -->
+  <circle cx="250" cy="250" r="168" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 6"/>
+
+  <!--
+    Node centers on circle r=168, center=250,250:
+    N1 (Maison):  angle=-90° → 250, 82
+    N2 (Pun Z):   angle= 30° → 250+168*cos30=250+145.5=395.5, 250+168*sin30=250+84=334
+    N3 (Travail): angle=150° → 250-145.5=104.5, 334
+    Node radius = 52
+  -->
+
+  <!-- ARROWS (drawn before nodes so nodes sit on top) -->
+  <!-- Hidden motion paths -->
+  <path id="arc1" d="M 294 99  Q 415 155 378 290" fill="none" stroke="none"/>
+  <path id="arc2" d="M 362 373 Q 250 418 138 373" fill="none" stroke="none"/>
+  <path id="arc3" d="M 122 290 Q 85 155 206 99"  fill="none" stroke="none"/>
+
+  <!-- Visible arrow paths -->
+  <path d="M 294 99  Q 415 155 378 290"
+    fill="none" stroke="url(#ag1)" stroke-width="1.4"
+    stroke-linecap="round" marker-end="url(#ah1)" opacity="0.9"/>
+
+  <path d="M 362 373 Q 250 418 138 373"
+    fill="none" stroke="url(#ag2)" stroke-width="1.4"
+    stroke-linecap="round" marker-end="url(#ah2)" opacity="0.9"/>
+
+  <path d="M 122 290 Q 85 155 206 99"
+    fill="none" stroke="url(#ag3)" stroke-width="1.4"
+    stroke-linecap="round" marker-end="url(#ah3)" opacity="0.9"/>
+
+  <!-- Travelling dots -->
+  <circle r="3" fill="#7eb8e8" filter="url(#dotGlow)" opacity="0.95">
+    <animateMotion dur="4s" repeatCount="indefinite" begin="0s">
+      <mpath href="#arc1"/>
+    </animateMotion>
+  </circle>
+  <circle r="3" fill="#7eb8e8" filter="url(#dotGlow)" opacity="0.95">
+    <animateMotion dur="4s" repeatCount="indefinite" begin="1.33s">
+      <mpath href="#arc2"/>
+    </animateMotion>
+  </circle>
+  <circle r="3" fill="#7eb8e8" filter="url(#dotGlow)" opacity="0.95">
+    <animateMotion dur="4s" repeatCount="indefinite" begin="2.66s">
+      <mpath href="#arc3"/>
+    </animateMotion>
+  </circle>
+
+  <!-- NODE 1: MAISON (top, 250, 82) -->
+  <g filter="url(#nodeShadow)">
+    <circle cx="250" cy="82" r="52" fill="url(#nodeFill)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+    <!-- Shimmer ring (rotating stroke dash) -->
+    <circle cx="250" cy="82" r="52" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1"
+      stroke-dasharray="40 285">
+      <animateTransform attributeName="transform" type="rotate" from="0 250 82" to="360 250 82" dur="6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <!-- Accent dot -->
+  <circle cx="250" cy="57" r="2.5" fill="#7eb8e8" opacity="0.8" filter="url(#dotGlow)"/>
+  <text x="250" y="78" text-anchor="middle" font-family="'DM Serif Display', serif" font-size="10" fill="rgba(255,255,255,0.3)" letter-spacing="2">01</text>
+  <text x="250" y="96" text-anchor="middle" font-family="'DM Sans', sans-serif" font-size="13" font-weight="500" fill="rgba(255,255,255,0.88)" letter-spacing="0.5">Maison</text>
+
+  <!-- NODE 2: PUN Z (bottom-right, 395, 334) -->
+  <g filter="url(#nodeShadow)">
+    <circle cx="395" cy="334" r="52" fill="url(#nodeFill)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+    <circle cx="395" cy="334" r="52" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1"
+      stroke-dasharray="40 285">
+      <animateTransform attributeName="transform" type="rotate" from="120 395 334" to="480 395 334" dur="6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <circle cx="395" cy="309" r="2.5" fill="#7eb8e8" opacity="0.8" filter="url(#dotGlow)"/>
+  <text x="395" y="330" text-anchor="middle" font-family="'DM Serif Display', serif" font-size="10" fill="rgba(255,255,255,0.3)" letter-spacing="2">02</text>
+  <text x="395" y="348" text-anchor="middle" font-family="'DM Sans', sans-serif" font-size="13" font-weight="500" fill="rgba(255,255,255,0.88)" letter-spacing="0.5">Travail</text>
+
+  <!-- NODE 3: TRAVAIL (bottom-left, 105, 334) -->
+  <g filter="url(#nodeShadow)">
+    <circle cx="105" cy="334" r="52" fill="url(#nodeFill)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+    <circle cx="105" cy="334" r="52" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1"
+      stroke-dasharray="40 285">
+      <animateTransform attributeName="transform" type="rotate" from="240 105 334" to="600 105 334" dur="6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <circle cx="105" cy="309" r="2.5" fill="#7eb8e8" opacity="0.8" filter="url(#dotGlow)"/>
+  <text x="105" y="330" text-anchor="middle" font-family="'DM Serif Display', serif" font-size="10" fill="rgba(255,255,255,0.3)" letter-spacing="2">03</text>
+  <text x="105" y="348" text-anchor="middle" font-family="'DM Sans', sans-serif" font-size="13" font-weight="500" fill="rgba(255,255,255,0.88)" letter-spacing="0.5">Pun Z</text>
+
+  <!-- Center label -->
+  <text x="250" y="254" text-anchor="middle" font-family="'DM Serif Display', serif" font-size="10" fill="rgba(255,255,255,0.14)" letter-spacing="4">CYCLE</text>
+
+</svg>
+</div>
+</body>
+</html>
