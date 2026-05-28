@@ -3,63 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulateur Freelance — Net après impôt</title>
+<title>Simulateur Freelance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f5f2;
-    --surface: #ffffff;
-    --surface2: #eeebe6;
-    --border: rgba(0,0,0,0.1);
-    --border2: rgba(0,0,0,0.22);
-    --text: #1a1916;
-    --muted: #5e5c56;
-    --hint: #a8a49c;
-    --green: #2a6048;
-    --green-dim: #edf4f0;
-    --amber: #8a5a24;
-    --amber-dim: #fdf4e8;
+    --bg: #f7f5f2; --surface: #ffffff; --surface2: #eeebe6;
+    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.22);
+    --text: #1a1916; --muted: #5e5c56; --hint: #a8a49c;
     --serif: 'Cormorant Garamond', Georgia, serif;
     --sans: 'Jost', sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; padding: 32px 32px 80px; -webkit-font-smoothing: antialiased; }
-  .container { max-width: 720px; margin: 0 auto; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; padding: 0; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 720px; margin: 0 auto; padding: 32px 32px 80px; }
   .header { margin-bottom: 36px; animation: fadeUp 0.6s ease both; }
-  .header-tag { font-size: 11px; font-weight: 400; color: var(--hint); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 4px; }
-  h1 { font-family: var(--serif); font-size: clamp(28px, 5vw, 42px); font-weight: 400; color: var(--text); line-height: 1.15; margin-bottom: 8px; }
-  .header-sub { font-size: 13px; font-weight: 300; color: var(--hint); }
+  .header-tag { font-size: 11px; color: var(--hint); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 4px; }
+  h1 { font-family: var(--serif); font-size: clamp(28px,5vw,42px); font-weight: 400; color: var(--text); line-height: 1.15; }
   .section { margin-bottom: 40px; animation: fadeUp 0.6s 0.08s ease both; }
-  .section-label { font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hint); margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+  .section-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hint); margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
   .section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
-  .inputs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .inputs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label { font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: 0.04em; }
+  .field label { font-size: 12px; color: var(--muted); }
   .input-wrap { position: relative; }
-  .input-wrap input { width: 100%; background: transparent; border: none; border-bottom: 1.5px solid var(--border2); padding: 8px 36px 8px 0; font-size: 26px; font-weight: 400; font-family: var(--serif); color: var(--text); outline: none; transition: border-color 0.2s; }
+  .input-wrap input { width: 100%; background: transparent; border: none; border-bottom: 1.5px solid var(--border2); padding: 8px 36px 8px 0; font-size: 26px; font-family: var(--serif); color: var(--text); outline: none; transition: border-color 0.2s; }
   .input-wrap input:focus { border-color: var(--text); }
-  .input-wrap .unit { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 400; color: var(--muted); pointer-events: none; }
+  .input-wrap .unit { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--muted); pointer-events: none; }
   .field .hint { font-size: 11px; font-weight: 300; color: var(--hint); }
-
-  /* CA ligne 1 : 3 colonnes */
-  .ca-row1 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
-  /* CA ligne 2 : CA mensuel net (large) + CA annuel (petit) */
+  .ca-row1 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
   .ca-row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-top: none; }
-
   .ca-card { background: var(--surface); padding: 16px 18px; }
-  .ca-card.dimmed { background: var(--surface2); }
-  .ca-card .label { font-size: 11px; font-weight: 400; color: var(--hint); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
-  .ca-card .val { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--text); }
+  .ca-card .label { font-size: 11px; color: var(--hint); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .ca-card .val { font-family: var(--serif); font-size: 22px; color: var(--text); }
   .ca-card .sub { font-size: 11px; font-weight: 300; color: var(--hint); margin-top: 3px; }
-
-  /* CA mensuel net — mis en avant */
   .ca-card.featured { background: var(--text); }
   .ca-card.featured .label { color: rgba(255,255,255,0.45); }
-  .ca-card.featured .val { font-size: 30px; color: #ffffff; }
+  .ca-card.featured .val { font-size: 30px; color: #fff; }
   .ca-card.featured .sub { color: rgba(255,255,255,0.35); }
-
-  /* CA annuel — mis en retrait */
   .ca-card.faded { background: var(--surface2); }
   .ca-card.faded .label { color: var(--hint); }
   .ca-card.faded .val { font-size: 18px; color: var(--hint); }
@@ -69,37 +50,44 @@
   .dropdown { border: 1px solid var(--border); overflow: hidden; }
   .dropdown-trigger { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--surface); cursor: pointer; user-select: none; border: none; width: 100%; text-align: left; }
   .dropdown-trigger:hover { background: var(--surface2); }
-  .dropdown-trigger .dt-label { font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hint); }
+  .dropdown-trigger .dt-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hint); }
   .dropdown-trigger .dt-arrow { font-size: 13px; color: var(--hint); transition: transform 0.25s; display: inline-block; }
   .dropdown-trigger.open .dt-arrow { transform: rotate(180deg); }
   .dropdown-body { display: none; border-top: 1px solid var(--border); }
   .dropdown-body.open { display: block; }
 
-  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
-  @media (max-width: 520px) { .results-grid { grid-template-columns: 1fr; } }
-  .result-card { padding: 22px 20px; }
-  .result-card.acre1 { background: var(--green-dim); }
-  .result-card.acre2 { background: var(--surface); }
-  .result-card.normal { background: var(--amber-dim); }
-  .result-card .rc-label { font-size: 11px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-  .result-card.acre1 .rc-label { color: var(--green); }
-  .result-card.acre2 .rc-label { color: var(--muted); }
-  .result-card.normal .rc-label { color: var(--amber); }
-  .result-card .rc-val { font-family: var(--serif); font-size: 30px; font-weight: 400; line-height: 1; margin-bottom: 6px; }
-  .result-card.acre1 .rc-val { color: var(--green); }
-  .result-card.acre2 .rc-val { color: var(--text); }
-  .result-card.normal .rc-val { color: var(--amber); }
-  .result-card .rc-sub { font-size: 12px; font-weight: 300; color: var(--hint); }
+  /* Toggles row */
+  .toggles-row { display: flex; flex-direction: column; gap: 0; background: var(--surface); border-bottom: 0.5px solid var(--border); }
+  .toggle-line { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 0.5px solid var(--border); }
+  .toggle-line:last-child { border-bottom: none; }
+
+  /* Toggle switch */
+  .toggle-item { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .toggle-item .tg-label { font-size: 12px; color: var(--muted); user-select: none; }
+  .toggle-switch { width: 36px; height: 20px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border2); position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .toggle-switch::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--hint); top: 2px; left: 2px; transition: left 0.2s, background 0.2s; }
+  .toggle-item.on .toggle-switch { background: var(--text); border-color: var(--text); }
+  .toggle-item.on .toggle-switch::after { left: 18px; background: #fff; }
+  .toggle-item.on .tg-label { color: var(--text); }
+
+  /* Radio buttons ACRE — masqués si ACRE off */
+  .acre-radios { display: none; gap: 4px; margin-left: auto; }
+  .acre-radios.visible { display: flex; }
+  .radio-btn { font-size: 11px; font-weight: 400; font-family: var(--sans); padding: 4px 12px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; border-radius: 20px; transition: background 0.15s, color 0.15s; }
+  .radio-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* Résultat */
+  .result-single { padding: 22px 20px; background: var(--surface); border-bottom: 0.5px solid var(--border); }
+  .result-single .rs-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .result-single .rs-val { font-family: var(--serif); font-size: 36px; font-weight: 400; color: var(--text); }
+  .result-single .rs-sub { font-size: 12px; font-weight: 300; color: var(--hint); margin-top: 4px; }
 
   .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .detail-table th { text-align: right; padding: 10px 14px; color: var(--hint); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1.5px solid var(--border2); font-weight: 400; }
   .detail-table th:first-child { text-align: left; }
   .detail-table td { padding: 11px 14px; border-bottom: 0.5px solid var(--border); text-align: right; color: var(--muted); font-weight: 300; }
   .detail-table td:first-child { text-align: left; color: var(--text); font-weight: 400; }
-  .detail-table tr:last-child td { border-bottom: none; color: var(--text); font-weight: 500; font-size: 14px; }
-  .td-green { color: var(--green) !important; font-weight: 500 !important; }
-  .td-amber { color: var(--amber) !important; font-weight: 500 !important; }
-
+  .detail-table tr:last-child td { border-bottom: none; font-weight: 500; color: var(--text); font-size: 14px; }
   .footer-note { font-size: 12px; font-weight: 300; color: var(--hint); line-height: 1.9; padding: 14px 18px; border-top: 0.5px solid var(--border); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -110,7 +98,6 @@
   <div class="header">
     <div class="header-tag">Simulateur</div>
     <h1>Simulateur freelance</h1>
-    
   </div>
 
   <div class="section">
@@ -176,7 +163,6 @@
     </div>
   </div>
 
-  <!-- Dropdown "Détail net" -->
   <div class="dropdown">
     <button class="dropdown-trigger" id="dropdown-btn" onclick="toggleDropdown()">
       <span class="dt-label">Détail net</span>
@@ -184,61 +170,61 @@
     </button>
     <div class="dropdown-body" id="dropdown-body">
 
-      <div class="results-grid">
-        <div class="result-card acre1">
-          <div class="rc-label">ACRE — Année 1</div>
-          <div class="rc-val" id="r-acre1">—</div>
-          <div class="rc-sub">Cotisations −50%</div>
+      <div class="toggles-row">
+
+        <!-- Toggle ACRE + radios conditionnels -->
+        <div class="toggle-line">
+          <div class="toggle-item" id="toggle-acre" onclick="toggleAcre()">
+            <div class="toggle-switch"></div>
+            <span class="tg-label">ACRE</span>
+          </div>
+          <div class="acre-radios" id="acre-radios">
+            <button class="radio-btn active" id="radio-an1" onclick="setAcreYear(1)">1ère année</button>
+            <button class="radio-btn" id="radio-an2" onclick="setAcreYear(2)">2ème année</button>
+          </div>
         </div>
-        <div class="result-card acre2">
-          <div class="rc-label">ACRE — Année 2</div>
-          <div class="rc-val" id="r-acre2">—</div>
-          <div class="rc-sub">Cotisations −25%</div>
+
+        <!-- Toggle libératoire -->
+        <div class="toggle-line">
+          <div class="toggle-item" id="toggle-liberal" onclick="toggleLiberal()">
+            <div class="toggle-switch"></div>
+            <span class="tg-label">Prélèvement libératoire</span>
+          </div>
         </div>
-        <div class="result-card normal">
-          <div class="rc-label">Sans ACRE</div>
-          <div class="rc-val" id="r-normal">—</div>
-          <div class="rc-sub">Taux plein 24,8%</div>
-        </div>
+
+      </div>
+
+      <div class="result-single">
+        <div class="rs-label">Net mensuel estimé</div>
+        <div class="rs-val" id="rs-val">—</div>
+        <div class="rs-sub" id="rs-sub">—</div>
       </div>
 
       <table class="detail-table">
         <thead>
           <tr>
-            <th></th>
-            <th>ACRE an. 1</th>
-            <th>ACRE an. 2</th>
-            <th>Sans ACRE</th>
+            <th style="text-align:left;">Poste</th>
+            <th>Montant</th>
           </tr>
         </thead>
         <tbody id="detail-tbody"></tbody>
       </table>
 
-      <div class="footer-note">
-        Barème IR 2025 · Abattement BNC 34% · Célibataire sans enfant<br>
-        ACRE an. 1 = cotisations ×50% · ACRE an. 2 = cotisations ×75% · Formation pro 0,2% non réduite<br>
-        Estimations indicatives — consulter un expert-comptable pour un calcul personnalisé.
-      </div>
+      <div class="footer-note" id="footer-note"></div>
 
     </div>
   </div>
 
 </div>
 <script>
-function toggleDropdown() {
-  const btn = document.getElementById('dropdown-btn');
-  const body = document.getElementById('dropdown-body');
-  btn.classList.toggle('open');
-  body.classList.toggle('open');
-}
+const state = { acre: false, acreYear: 1, liberal: false };
 
 const TRANCHES = [
-  {min:0,max:11497,taux:0},
-  {min:11497,max:29315,taux:0.11},
-  {min:29315,max:83086,taux:0.30},
-  {min:83086,max:177106,taux:0.41},
+  {min:0,max:11497,taux:0},{min:11497,max:29315,taux:0.11},
+  {min:29315,max:83086,taux:0.30},{min:83086,max:177106,taux:0.41},
   {min:177106,max:Infinity,taux:0.45}
 ];
+
 function calcIR(rev) {
   let ir = 0;
   for (const t of TRANCHES) {
@@ -247,15 +233,65 @@ function calcIR(rev) {
   }
   return ir;
 }
+
 function fmt(n) { return Math.round(n).toLocaleString('fr-FR') + ' €'; }
-function calcNet(caMensuel, cotisRate) {
-  const caAnnuel = caMensuel * 12;
-  const cotis = caMensuel * cotisRate;
-  const cfp = caMensuel * 0.002;
-  const benefice = caAnnuel * 0.66;
-  const irMensuel = calcIR(benefice) / 12;
-  return { cotis: Math.round(cotis + cfp), ir: Math.round(irMensuel), net: Math.round(caMensuel - cotis - cfp - irMensuel) };
+
+function toggleDropdown() {
+  document.getElementById('dropdown-btn').classList.toggle('open');
+  document.getElementById('dropdown-body').classList.toggle('open');
 }
+
+function toggleAcre() {
+  state.acre = !state.acre;
+  document.getElementById('toggle-acre').classList.toggle('on', state.acre);
+  document.getElementById('acre-radios').classList.toggle('visible', state.acre);
+  update();
+}
+
+function setAcreYear(y) {
+  state.acreYear = y;
+  document.getElementById('radio-an1').classList.toggle('active', y === 1);
+  document.getElementById('radio-an2').classList.toggle('active', y === 2);
+  update();
+}
+
+function toggleLiberal() {
+  state.liberal = !state.liberal;
+  document.getElementById('toggle-liberal').classList.toggle('on', state.liberal);
+  update();
+}
+
+function getCotisRate() {
+  if (!state.acre) return 0.246;
+  return state.acreYear === 1 ? 0.123 : 0.185;
+}
+
+function getCotisLabel() {
+  if (!state.acre) return 'Cotisations BNC (24,6%)';
+  return state.acreYear === 1 ? 'Cotisations ACRE an.1 (12,3%)' : 'Cotisations ACRE an.2 (18,5%)';
+}
+
+function getScenarioLabel() {
+  const parts = [];
+  if (state.acre) parts.push('ACRE ' + (state.acreYear === 1 ? 'an.1' : 'an.2'));
+  parts.push(state.liberal ? 'Prél. libératoire' : 'Barème IR');
+  return parts.join(' · ');
+}
+
+function calcDetail(ca) {
+  const cotis = Math.round(ca * getCotisRate());
+  const cfp = Math.round(ca * 0.002);
+  let ir, irLabel;
+  if (state.liberal) {
+    ir = Math.round(ca * 0.022);
+    irLabel = 'Prélèvement libératoire (2,2%)';
+  } else {
+    ir = Math.round(calcIR(ca * 12 * 0.66) / 12);
+    irLabel = 'IR mensuel estimé (barème)';
+  }
+  return { cotis, cfp, ir, irLabel, net: Math.round(ca - cotis - cfp - ir) };
+}
+
 function update() {
   const tjm = parseFloat(document.getElementById('tjm').value) || 0;
   const jours = parseFloat(document.getElementById('jours').value) || 0;
@@ -264,31 +300,40 @@ function update() {
   const moisBrut = semaine * 4;
   const remiseMontant = moisBrut * remisePct / 100;
   const moisNet = moisBrut - remiseMontant;
+
   document.getElementById('r-sem').textContent = fmt(semaine);
   document.getElementById('r-mois').textContent = fmt(moisBrut);
   document.getElementById('r-remise-montant').textContent = remisePct > 0 ? '− ' + fmt(remiseMontant) : '—';
   document.getElementById('r-remise-sub').textContent = remisePct > 0 ? remisePct + '% de réduction' : 'Aucune remise';
   document.getElementById('r-net-ca').textContent = fmt(moisNet);
   document.getElementById('r-annuel').textContent = fmt(moisNet * 12);
-  const a1 = calcNet(moisNet, 0.123);
-  const a2 = calcNet(moisNet, 0.185);
-  const normal = calcNet(moisNet, 0.246);
-  document.getElementById('r-acre1').textContent = fmt(a1.net);
-  document.getElementById('r-acre2').textContent = fmt(a2.net);
-  document.getElementById('r-normal').textContent = fmt(normal.net);
+
+  const d = calcDetail(moisNet);
+  document.getElementById('rs-val').textContent = fmt(d.net);
+  document.getElementById('rs-sub').textContent = getScenarioLabel();
+
   const rows = [
-    ['CA mensuel net', fmt(moisNet), fmt(moisNet), fmt(moisNet), false],
-    ['Cotisations + CFP', '− ' + fmt(a1.cotis), '− ' + fmt(a2.cotis), '− ' + fmt(normal.cotis), false],
-    ['IR mensuel estimé', '− ' + fmt(a1.ir), '− ' + fmt(a2.ir), '− ' + fmt(normal.ir), false],
-    ['Net mensuel', fmt(a1.net), fmt(a2.net), fmt(normal.net), true],
+    ['CA mensuel net', fmt(moisNet)],
+    [getCotisLabel(), '− ' + fmt(d.cotis)],
+    ['Formation pro (0,2%)', '− ' + fmt(d.cfp)],
+    [d.irLabel, '− ' + fmt(d.ir)],
+    ['Net mensuel', fmt(d.net)],
   ];
-  document.getElementById('detail-tbody').innerHTML = rows.map(r =>
-    `<tr><td>${r[0]}</td><td class="${r[4]?'td-green':''}">${r[1]}</td><td>${r[2]}</td><td class="${r[4]?'td-amber':''}">${r[3]}</td></tr>`
-  ).join('');
+
+  document.getElementById('detail-tbody').innerHTML = rows.map((r, i) => {
+    const last = i === rows.length - 1;
+    const s = last ? 'font-weight:500;color:var(--text);font-size:14px;' : '';
+    return `<tr><td style="${s}">${r[0]}</td><td style="text-align:right;${s}">${r[1]}</td></tr>`;
+  }).join('');
+
+  const notes = [];
+  if (state.acre) notes.push(state.acreYear === 1 ? 'ACRE an.1 = cotisations réduites de 50% (12,3%)' : 'ACRE an.2 = cotisations réduites de 25% (18,5%)');
+  notes.push(state.liberal ? 'Prélèvement libératoire = 2,2% du CA (BNC)' : 'Barème IR 2025 · Abattement BNC 34% · Célibataire sans enfant');
+  notes.push('Estimations indicatives — consulter un expert-comptable');
+  document.getElementById('footer-note').innerHTML = notes.join('<br>');
 }
-document.getElementById('tjm').addEventListener('input', update);
-document.getElementById('jours').addEventListener('input', update);
-document.getElementById('remise').addEventListener('input', update);
+
+['tjm','jours','remise'].forEach(id => document.getElementById(id).addEventListener('input', update));
 update();
 </script>
 </body>
