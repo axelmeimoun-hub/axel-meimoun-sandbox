@@ -31,7 +31,7 @@
   .input-wrap input:focus { border-color: var(--text); }
   .input-wrap .unit { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--muted); pointer-events: none; }
   .field .hint { font-size: 11px; font-weight: 300; color: var(--hint); }
-  .ca-row1 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .ca-row1 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
   .ca-row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-top: none; }
   .ca-card { background: var(--surface); padding: 16px 18px; }
   .ca-card .label { font-size: 11px; color: var(--hint); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
@@ -133,6 +133,11 @@
   <div class="section">
     <div class="section-label">Chiffre d'affaires</div>
     <div class="ca-row1">
+      <div class="ca-card">
+        <div class="label">Heures / semaine</div>
+        <div class="val" id="r-heures">—</div>
+        <div class="sub">jours × 8h</div>
+      </div>
       <div class="ca-card">
         <div class="label">Par semaine</div>
         <div class="val" id="r-sem">—</div>
@@ -296,6 +301,8 @@ function update() {
   const tjm = parseFloat(document.getElementById('tjm').value) || 0;
   const jours = parseFloat(document.getElementById('jours').value) || 0;
   const remisePct = parseFloat(document.getElementById('remise').value) || 0;
+  const heures = jours * 8;
+  document.getElementById('r-heures').textContent = heures % 1 === 0 ? heures + 'h' : heures.toFixed(1) + 'h';
   const semaine = tjm * jours;
   const moisBrut = semaine * 4;
   const remiseMontant = moisBrut * remisePct / 100;
