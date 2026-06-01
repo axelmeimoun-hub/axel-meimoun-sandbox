@@ -23,7 +23,7 @@
   .section { margin-bottom: 40px; animation: fadeUp 0.6s 0.08s ease both; }
   .section-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hint); margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
   .section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
-  .inputs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+  .inputs-grid { display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 24px; align-items: end; }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label { font-size: 12px; color: var(--muted); }
   .input-wrap { position: relative; }
@@ -31,6 +31,10 @@
   .input-wrap input:focus { border-color: var(--text); }
   .input-wrap .unit { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--muted); pointer-events: none; }
   .field .hint { font-size: 11px; font-weight: 300; color: var(--hint); }
+  .field-muted label { color: var(--hint); }
+  .field-muted .input-wrap input { font-size: 18px; color: var(--hint); border-bottom-color: var(--border); }
+  .field-muted .input-wrap .unit { color: var(--hint); font-size: 12px; }
+  .field-muted::after { content: ''; display: block; height: 16px; }
   .ca-row1 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
   .ca-row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-top: none; }
   .ca-card { background: var(--surface); padding: 16px 18px; }
@@ -119,13 +123,12 @@
         </div>
         <span class="hint">Jours facturés par semaine</span>
       </div>
-      <div class="field">
-        <label>Remise commerciale</label>
+      <div class="field field-muted">
+        <label>Remise</label>
         <div class="input-wrap">
           <input type="number" id="remise" value="0" min="0" max="100" step="1" />
           <span class="unit">%</span>
         </div>
-        <span class="hint">Réduction sur le CA brut</span>
       </div>
     </div>
   </div>
