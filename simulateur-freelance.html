@@ -716,6 +716,13 @@ function updateDropdown({ netLabel, netVal, rows }) {
   document.getElementById('footer-note').innerHTML = notes.join('<br>');
 }
 
+/* ── Empêche la molette de modifier les inputs number ── */
+document.addEventListener('wheel', function() {
+  if (document.activeElement && document.activeElement.type === 'number') {
+    document.activeElement.blur();
+  }
+}, { passive: true });
+
 /* ── Init ── */
 buildPrecisPanel();
 loadState();
