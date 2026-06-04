@@ -317,6 +317,7 @@
 <script>
 /* ── État global ── */
 const state = { acre: false, acreYear: 1, liberal: false };
+let activeTab = 'arrondi';
 const STORAGE_KEY = 'sf_v1';
 const DEFAULTS = { tjm: 700, jours: 2.5, remise: 0, tjmPrecis: 700 };
 
@@ -577,10 +578,12 @@ function calcDetailPrecis(caTotal) {
 
 /* ── Tabs ── */
 function switchTab(tab) {
+  activeTab = tab;
   document.getElementById('panel-arrondi').style.display = tab === 'arrondi' ? 'block' : 'none';
   document.getElementById('panel-precis').style.display  = tab === 'precis'  ? 'block' : 'none';
   document.getElementById('tab-arrondi').classList.toggle('active', tab === 'arrondi');
   document.getElementById('tab-precis').classList.toggle('active',  tab === 'precis');
+  if (tab === 'arrondi') update(); else updatePrecis();
   saveState();
 }
 
@@ -630,28 +633,20 @@ function update() {
   document.getElementById('r-net-ca').textContent        = fmt(moisNet);
   document.getElementById('r-annuel').textContent        = fmt(moisNet * 12);
 
-  const d = calcDetail(moisNet);
-  document.getElementById('rs-val').textContent = fmt(d.net);
-  document.getElementById('rs-sub').textContent = getScenarioLabel();
-
-  const rows = [
-    ['CA mensuel net',        fmt(moisNet)],
-    [getCotisLabel(),         '− ' + fmt(d.cotis)],
-    ['Formation pro (0,2%)',  '− ' + fmt(d.cfp)],
-    [d.irLabel,               '− ' + fmt(d.ir)],
-    ['Net mensuel',           fmt(d.net)],
-  ];
-  document.getElementById('detail-tbody').innerHTML = rows.map((r, i) => {
-    const last = i === rows.length - 1;
-    const s = last ? 'font-weight:500;color:var(--text);font-size:14px;' : '';
-    return `<tr><td style="${s}">${r[0]}</td><td style="text-align:right;${s}">${r[1]}</td></tr>`;
-  }).join('');
-
-  const notes = [];
-  if (state.acre) notes.push(state.acreYear === 1 ? 'ACRE an.1 = cotisations réduites de 50% (12,3%)' : 'ACRE an.2 = cotisations réduites de 25% (18,5%)');
-  notes.push(state.liberal ? 'Prélèvement libératoire = 2,2% du CA (BNC)' : 'Barème IR 2025 · Abattement BNC 34% · Célibataire sans enfant');
-  notes.push('Estimations indicatives — consulter un expert-comptable');
-  document.getElementById('footer-note').innerHTML = notes.join('<br>');
+  if (activeTab === 'arrondi') {
+    const d = calcDetail(moisNet);
+    updateDropdown({
+      netLabel: 'Net mensuel estimé',
+      netVal: d.net,
+      rows: [
+        ['CA mensuel net',       fmt(moisNet)],
+        [getCotisLabel(),        '− ' + fmt(d.cotis)],
+        ['Formation pro (0,2%)', '− ' + fmt(d.cfp)],
+        [d.irLabel,              '− ' + fmt(d.ir)],
+        ['Net mensuel',          fmt(d.net)],
+      ],
+    });
+  }
   saveState();
 }
 
@@ -682,13 +677,43 @@ function updatePrecis() {
   const caTotal = tjm * totalJours;
   document.getElementById('precis-ca-total').textContent = caTotal > 0 ? fmt(caTotal) : '—';
 
-  if (caTotal > 0) {
-    const d = calcDetailPrecis(caTotal);
-    document.getElementById('precis-net').textContent = fmt(d.net);
-  } else {
-    document.getElementById('precis-net').textContent = '—';
+  if (activeTab === 'precis') {
+    if (caTotal > 0) {
+      const d = calcDetailPrecis(caTotal);
+      const irLabel = state.liberal ? 'Prélèvement libératoire (2,2%)' : 'IR estimé (barème, 7 mois)';
+      updateDropdown({
+        netLabel: 'Net estimé (7 mois)',
+        netVal: d.net,
+        rows: [
+          ['CA total net',         fmt(caTotal)],
+          [getCotisLabel(),        '− ' + fmt(d.cotis)],
+          ['Formation pro (0,2%)', '− ' + fmt(d.cfp)],
+          [irLabel,                '− ' + fmt(d.ir)],
+          ['Net total (7 mois)',   fmt(d.net)],
+        ],
+      });
+    } else {
+      updateDropdown({ netLabel: 'Net estimé (7 mois)', netVal: null, rows: [] });
+    }
   }
   saveState();
+}
+
+/* ── Mise à jour du dropdown (partagé) ── */
+function updateDropdown({ netLabel, netVal, rows }) {
+  document.getElementById('rs-val').textContent = netVal != null ? fmt(netVal) : '—';
+  document.querySelector('.rs-label').textContent = netLabel;
+  document.getElementById('rs-sub').textContent = getScenarioLabel();
+  document.getElementById('detail-tbody').innerHTML = rows.map((r, i) => {
+    const last = i === rows.length - 1;
+    const s = last ? 'font-weight:500;color:var(--text);font-size:14px;' : '';
+    return `<tr><td style="${s}">${r[0]}</td><td style="text-align:right;${s}">${r[1]}</td></tr>`;
+  }).join('');
+  const notes = [];
+  if (state.acre) notes.push(state.acreYear === 1 ? 'ACRE an.1 = cotisations réduites de 50% (12,3%)' : 'ACRE an.2 = cotisations réduites de 25% (18,5%)');
+  notes.push(state.liberal ? 'Prélèvement libératoire = 2,2% du CA (BNC)' : 'Barème IR 2025 · Abattement BNC 34% · Célibataire sans enfant');
+  notes.push('Estimations indicatives — consulter un expert-comptable');
+  document.getElementById('footer-note').innerHTML = notes.join('<br>');
 }
 
 /* ── Init ── */
