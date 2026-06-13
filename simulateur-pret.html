@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulateur de prêt immobilier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prop-types@15/prop-types.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1a1d2e;
+    --navy-light: #252840;
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --surface2: #f7f8fc;
+    --border: #e2e6f0;
+    --border-light: #edf0f7;
+    --text: #0f1117;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --accent: #1a1d2e;
+    --blue: #3b82f6;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06);
+    --font: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root { min-height: 100vh; }
+
+  /* Sliders */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--navy);
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--navy);
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+
+  input[type=number] {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    width: 90px;
+    text-align: right;
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus { border-color: var(--navy); }
+
+  /* Print styles */
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff; }
+    .scenario-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    .amortization-section { display: block !important; }
+  }
+
+  @media (max-width: 768px) {
+    .scenarios-wrapper {
+      display: flex !important;
+      flex-direction: row !important;
+      overflow-x: auto !important;
+      scroll-snap-type: x mandatory !important;
+      gap: 16px !important;
+      padding-bottom: 12px !important;
+    }
+    .scenario-card {
+      min-width: 88vw !important;
+      scroll-snap-align: start !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useMemo, useCallback } = React;
+const { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } = Recharts;
+
+function fmt(n, decimals = 0) {
+  return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: decimals, minimumFractionDigits: decimals }).format(Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals));
+}
+
+function computeLoan({ montant, taux, assurance, garantie, notaire, duree }) {
+  const n = duree * 12;
+  const r = taux / 100 / 12;
+  const ra = assurance / 100 / 12;
+
+  let mensHorsAss = 0;
+  if (r === 0) {
+    mensHorsAss = montant / n;
+  } else {
+    mensHorsAss = montant * r / (1 - Math.pow(1 + r, -n));
+  }
+  const mensAssurance = montant * ra;
+  const mensTotale = mensHorsAss + mensAssurance;
+
+  const interetsTotaux = mensHorsAss * n - montant;
+  const assuranceTotale = mensAssurance * n;
+  const fraisGarantie = montant * garantie / 100;
+  const fraisNotaire = montant * notaire / 100;
+  const coutTotal = montant + interetsTotaux + assuranceTotale + fraisGarantie + fraisNotaire;
+
+  // Tableau amortissement
+  let tableau = [];
+  let capitalRestant = montant;
+  for (let m = 1; m <= n; m++) {
+    const interets = capitalRestant * r;
+    const capital = mensHorsAss - interets;
+    capitalRestant = Math.max(0, capitalRestant - capital);
+    tableau.push({
+      mois: m,
+      capitalRestant: Math.round(capitalRestant),
+      interets: Math.round(interets * 100) / 100,
+      assurance: Math.round(mensAssurance * 100) / 100,
+      capital: Math.round(capital * 100) / 100,
+    });
+  }
+
+  return { mensHorsAss, mensAssurance, mensTotale, interetsTotaux, assuranceTotale, fraisGarantie, fraisNotaire, coutTotal, tableau };
+}
+
+const defaultScenario = {
+  nom: 'Mon scénario',
+  montant: 250000,
+  taux: 3.5,
+  assurance: 0.25,
+  garantie: 1.2,
+  notaire: 7.5,
+  duree: 20,
+};
+
+const COLORS = ['#1a1d2e', '#4a7b9d', '#7fb8d4', '#a8d4e6', '#cce8f0'];
+const COLORS_LABELS = ['Capital', 'Intérêts', 'Assurance', 'Garantie', 'Notaire'];
+
+function SliderField({ label, value, onChange, min, max, step, suffix = '', decimals = 0 }) {
+  const pct = ((value - min) / (max - min)) * 100;
+  const trackStyle = {
+    background: `linear-gradient(to right, #1a1d2e ${pct}%, #e2e6f0 ${pct}%)`,
+  };
+
+  const handleInput = (e) => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)));
+  };
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6b7280' }}>{label}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <input
+            type="number"
+            value={value}
+            min={min}
+            max={max}
+            step={step}
+            onChange={handleInput}
+            style={{ width: decimals > 0 ? 75 : 90 }}
+          />
+          {suffix && <span style={{ fontSize: 13, color: '#9ca3af', fontFamily: 'var(--font-mono)' }}>{suffix}</span>}
+        </div>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        style={trackStyle}
+        className="no-print"
+      />
+    </div>
+  );
+}
+
+function DonutChart({ data }) {
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <PieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={90}
+          paddingAngle={1}
+          dataKey="value"
+          strokeWidth={0}
+        >
+          {data.map((entry, index) => (
+            React.createElement(Cell, { key: index, fill: COLORS[index] })
+          ))}
+        </Pie>
+        <Tooltip
+          formatter={(value) => [`${fmt(value)} €`, '']}
+          contentStyle={{
+            background: '#fff',
+            border: '1px solid #e2e6f0',
+            borderRadius: 8,
+            fontSize: 13,
+            fontFamily: 'DM Sans, sans-serif',
+          }}
+        />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+}
+
+function AmortizationTable({ tableau }) {
+  const [page, setPage] = useState(0);
+  const perPage = 24;
+  const total = tableau.length;
+  const slice = tableau.slice(page * perPage, (page + 1) * perPage);
+
+  const thStyle = {
+    padding: '8px 10px',
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: '#6b7280',
+    borderBottom: '1px solid #e2e6f0',
+    textAlign: 'right',
+    background: '#f7f8fc',
+  };
+  const tdStyle = {
+    padding: '7px 10px',
+    fontSize: 13,
+    fontFamily: 'DM Mono, monospace',
+    color: '#374151',
+    textAlign: 'right',
+    borderBottom: '1px solid #f0f2f7',
+  };
+
+  return (
+    <div>
+      <div style={{ maxHeight: 360, overflowY: 'auto', borderRadius: 10, border: '1px solid #e2e6f0' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <thead>
+            <tr>
+              <th style={{ ...thStyle, textAlign: 'left', width: '15%' }}>Mois</th>
+              <th style={{ ...thStyle, width: '25%' }}>Capital restant dû</th>
+              <th style={{ ...thStyle, width: '20%' }}>Intérêts</th>
+              <th style={{ ...thStyle, width: '20%' }}>Assurance</th>
+              <th style={{ ...thStyle, width: '20%' }}>Capital remb.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {slice.map((row) => (
+              <tr key={row.mois} style={{ transition: 'background 0.1s' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f7f8fc'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <td style={{ ...tdStyle, textAlign: 'left', color: '#9ca3af', fontFamily: 'DM Mono' }}>{row.mois}</td>
+                <td style={tdStyle}>{fmt(row.capitalRestant)} €</td>
+                <td style={{ ...tdStyle, color: '#4a7b9d' }}>{fmt(row.interets, 0)} €</td>
+                <td style={{ ...tdStyle, color: '#7fb8d4' }}>{fmt(row.assurance, 0)} €</td>
+                <td style={tdStyle}>{fmt(row.capital, 0)} €</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {total > perPage && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 12 }}>
+          <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+            style={{ padding: '4px 12px', borderRadius: 6, border: '1px solid #e2e6f0', background: '#fff', cursor: 'pointer', fontSize: 13, color: page === 0 ? '#ccc' : '#374151' }}>
+            ←
+          </button>
+          <span style={{ fontSize: 12, color: '#9ca3af' }}>{page + 1} / {Math.ceil(total / perPage)}</span>
+          <button onClick={() => setPage(p => Math.min(Math.ceil(total / perPage) - 1, p + 1))} disabled={page >= Math.ceil(total / perPage) - 1}
+            style={{ padding: '4px 12px', borderRadius: 6, border: '1px solid #e2e6f0', background: '#fff', cursor: 'pointer', fontSize: 13, color: page >= Math.ceil(total / perPage) - 1 ? '#ccc' : '#374151' }}>
+            →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ScenarioCard({ scenario, index, onUpdate, onRemove, showRemove }) {
+  const [showAmort, setShowAmort] = useState(false);
+  const results = useMemo(() => computeLoan(scenario), [scenario]);
+  const update = (field) => (val) => onUpdate({ ...scenario, [field]: val });
+
+  const donutData = [
+    { name: 'Capital', value: Math.round(scenario.montant) },
+    { name: 'Intérêts', value: Math.round(results.interetsTotaux) },
+    { name: 'Assurance', value: Math.round(results.assuranceTotale) },
+    { name: 'Garantie', value: Math.round(results.fraisGarantie) },
+    { name: 'Notaire', value: Math.round(results.fraisNotaire) },
+  ];
+
+  return (
+    <div className="scenario-card" style={{
+      background: '#fff',
+      borderRadius: var_('--radius-xl'),
+      boxShadow: '0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)',
+      overflow: 'hidden',
+      flex: '1 1 0',
+      minWidth: 0,
+    }}>
+      {/* Header */}
+      <div style={{ background: '#1a1d2e', padding: '20px 24px', position: 'relative' }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 4 }}>
+          Scénario {index + 1}
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 600, color: '#fff' }}>{scenario.nom}</div>
+        {showRemove && (
+          <button onClick={onRemove} className="no-print" style={{
+            position: 'absolute', top: 16, right: 16,
+            background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 6,
+            color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 12,
+            padding: '5px 10px', fontFamily: 'DM Sans',
+          }}>Supprimer</button>
+        )}
+      </div>
+
+      <div style={{ padding: '24px 24px 0' }}>
+        <SliderField label="Montant emprunté" value={scenario.montant} onChange={update('montant')} min={50000} max={1000000} step={5000} suffix="€" />
+        <SliderField label="Taux nominal" value={scenario.taux} onChange={update('taux')} min={0.5} max={8} step={0.05} suffix="%" decimals={2} />
+        <SliderField label="Taux assurance" value={scenario.assurance} onChange={update('assurance')} min={0.05} max={0.80} step={0.01} suffix="%" decimals={2} />
+        <SliderField label="Frais de garantie" value={scenario.garantie} onChange={update('garantie')} min={0.5} max={2.5} step={0.05} suffix="%" decimals={2} />
+        <SliderField label="Frais de notaire" value={scenario.notaire} onChange={update('notaire')} min={2} max={10} step={0.5} suffix="%" decimals={1} />
+        <SliderField label="Durée" value={scenario.duree} onChange={update('duree')} min={5} max={30} step={1} suffix="ans" />
+      </div>
+
+      {/* Mensualité principale */}
+      <div style={{ margin: '20px 24px 0', background: '#f0f2f7', borderRadius: 14, padding: '18px 20px' }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 8 }}>
+          Mensualité totale TCC
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+          <span style={{ fontSize: 40, fontWeight: 600, letterSpacing: '-0.02em', color: '#0f1117' }}>
+            {fmt(Math.round(results.mensTotale))}
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 500, color: '#374151' }}>€</span>
+          <span style={{ fontSize: 14, color: '#9ca3af', marginLeft: 2 }}>/mois</span>
+        </div>
+        <div style={{ display: 'flex', gap: 24, marginTop: 10 }}>
+          <div>
+            <span style={{ fontSize: 12, color: '#9ca3af' }}>Hors assurance</span>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#374151', fontFamily: 'DM Mono' }}>{fmt(Math.round(results.mensHorsAss))} €</div>
+          </div>
+          <div>
+            <span style={{ fontSize: 12, color: '#9ca3af' }}>Assurance</span>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#374151', fontFamily: 'DM Mono' }}>{fmt(Math.round(results.mensAssurance))} €</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Détail coûts */}
+      <div style={{ padding: '24px 24px 0' }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 14 }}>
+          Détail des coûts
+        </div>
+        {[
+          { label: 'Intérêts totaux', value: results.interetsTotaux, color: '#1a1d2e' },
+          { label: 'Assurance totale', value: results.assuranceTotale, color: '#4a7b9d' },
+          { label: 'Frais de garantie', value: results.fraisGarantie, color: '#7fb8d4' },
+          { label: 'Frais de notaire', value: results.fraisNotaire, color: '#a8d4e6' },
+        ].map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid #f0f2f7' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+              <span style={{ fontSize: 14, color: '#374151' }}>{item.label}</span>
+            </div>
+            <span style={{ fontFamily: 'DM Mono', fontSize: 14, fontWeight: 500, color: '#0f1117' }}>{fmt(Math.round(item.value))} €</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0 0' }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#0f1117' }}>Coût total opération</span>
+          <span style={{ fontFamily: 'DM Mono', fontSize: 15, fontWeight: 700, color: '#0f1117' }}>{fmt(Math.round(results.coutTotal))} €</span>
+        </div>
+      </div>
+
+      {/* Donut chart */}
+      <div style={{ padding: '20px 24px 0' }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 8 }}>
+          Répartition du coût total
+        </div>
+        <DonutChart data={donutData} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginTop: 4, paddingBottom: 4 }}>
+          {COLORS_LABELS.map((label, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#6b7280' }}>
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: COLORS[i], flexShrink: 0 }} />
+              {label}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Amortissement */}
+      <div style={{ padding: '20px 24px 24px' }}>
+        <button onClick={() => setShowAmort(s => !s)} className="no-print" style={{
+          width: '100%',
+          padding: '12px 20px',
+          borderRadius: 10,
+          border: '1.5px solid #1a1d2e',
+          background: '#fff',
+          cursor: 'pointer',
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: '#1a1d2e',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          transition: 'background 0.15s',
+          fontFamily: 'DM Sans',
+        }}
+          onMouseEnter={e => e.currentTarget.style.background = '#f7f8fc'}
+          onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+        >
+          <span style={{ fontSize: 10 }}>{showAmort ? '▲' : '▼'}</span>
+          {showAmort ? 'Masquer' : 'Voir'} le tableau d'amortissement
+        </button>
+
+        {showAmort && (
+          <div style={{ marginTop: 16 }} className="amortization-section">
+            <AmortizationTable tableau={results.tableau} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ComparisonBanner({ s1, r1, s2, r2 }) {
+  const diffMens = r2.mensTotale - r1.mensTotale;
+  const diffCout = r2.coutTotal - r1.coutTotal;
+
+  const pill = (val, label) => {
+    const positive = val > 0;
+    return React.createElement('div', {
+      style: {
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+        background: positive ? '#fff5f5' : '#f0faf5',
+        border: `1px solid ${positive ? '#fecaca' : '#bbf7d0'}`,
+        borderRadius: 12, padding: '12px 20px', minWidth: 180,
+      }
+    },
+      React.createElement('span', { style: { fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: positive ? '#ef4444' : '#10b981' } }, label),
+      React.createElement('span', {
+        style: { fontFamily: 'DM Mono', fontSize: 20, fontWeight: 600, color: positive ? '#dc2626' : '#059669' }
+      }, `${positive ? '+' : ''}${fmt(Math.round(val))} €`)
+    );
+  };
+
+  return (
+    <div style={{
+      background: '#fff',
+      borderRadius: 14,
+      border: '1px solid #e2e6f0',
+      padding: '18px 24px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexWrap: 'wrap',
+      gap: 20,
+      marginBottom: 24,
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: '#6b7280', marginRight: 8 }}>
+        Scénario 2 vs Scénario 1
+      </div>
+      {pill(diffMens, 'Diff. mensualité')}
+      {pill(diffCout, 'Diff. coût total')}
+    </div>
+  );
+}
+
+function AddScenarioCard({ onAdd }) {
+  return (
+    <div className="scenario-card no-print" onClick={onAdd} style={{
+      background: '#fff',
+      borderRadius: 24,
+      border: '2px dashed #d1d5db',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      flex: '1 1 0',
+      minWidth: 0,
+      minHeight: 280,
+      transition: 'border-color 0.2s, background 0.2s',
+      gap: 12,
+    }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = '#1a1d2e'; e.currentTarget.style.background = '#f9fafc'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.background = '#fff'; }}
+    >
+      <div style={{
+        width: 44, height: 44, borderRadius: '50%',
+        border: '2px solid #d1d5db',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 22, color: '#9ca3af',
+        transition: 'border-color 0.2s, color 0.2s',
+      }}>+</div>
+      <div style={{ fontSize: 14, color: '#9ca3af', fontWeight: 500, textAlign: 'center', padding: '0 20px', lineHeight: 1.5 }}>
+        Comparer avec un 2ème scénario
+      </div>
+    </div>
+  );
+}
+
+function var_(name) {
+  return `var(${name})`;
+}
+
+function App() {
+  const [scenarios, setScenarios] = useState([{ ...defaultScenario }]);
+
+  const updateScenario = useCallback((i, val) => {
+    setScenarios(prev => prev.map((s, idx) => idx === i ? val : s));
+  }, []);
+
+  const addScenario = useCallback(() => {
+    setScenarios(prev => [...prev, {
+      ...defaultScenario,
+      nom: 'Scénario alternatif',
+      taux: 3.8,
+      duree: 25,
+    }]);
+  }, []);
+
+  const removeScenario = useCallback((i) => {
+    setScenarios(prev => prev.filter((_, idx) => idx !== i));
+  }, []);
+
+  const results = useMemo(() => scenarios.map(s => computeLoan(s)), [scenarios]);
+
+  return (
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>
+            Outil personnel
+          </div>
+          <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.02em', color: '#0f1117', lineHeight: 1.2 }}>
+            Simulateur de prêt immobilier
+          </h1>
+        </div>
+        <button
+          className="no-print"
+          onClick={() => window.print()}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: '#1a1d2e', color: '#fff', border: 'none',
+            borderRadius: 10, padding: '12px 20px',
+            fontSize: 13, fontWeight: 600, letterSpacing: '0.05em',
+            textTransform: 'uppercase', cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(26,29,46,0.25)',
+            fontFamily: 'DM Sans',
+            transition: 'transform 0.15s, box-shadow 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(26,29,46,0.3)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,29,46,0.25)'; }}
+        >
+          <span style={{ fontSize: 14 }}>↓</span>
+          Exporter PDF
+        </button>
+      </div>
+
+      {/* Comparison banner */}
+      {scenarios.length === 2 && (
+        <ComparisonBanner s1={scenarios[0]} r1={results[0]} s2={scenarios[1]} r2={results[1]} />
+      )}
+
+      {/* Scenarios */}
+      <div className="scenarios-wrapper" style={{
+        display: 'grid',
+        gridTemplateColumns: scenarios.length === 2 ? '1fr 1fr' : '1fr 1fr',
+        gap: 20,
+        alignItems: 'start',
+      }}>
+        {scenarios.map((s, i) => (
+          React.createElement(ScenarioCard, {
+            key: i,
+            scenario: s,
+            index: i,
+            onUpdate: (val) => updateScenario(i, val),
+            onRemove: () => removeScenario(i),
+            showRemove: scenarios.length > 1 && i > 0,
+          })
+        ))}
+
+        {scenarios.length < 2 && (
+          React.createElement(AddScenarioCard, { onAdd: addScenario })
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
