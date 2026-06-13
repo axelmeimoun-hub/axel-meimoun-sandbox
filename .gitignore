@@ -1,0 +1,23 @@
+# Fichiers système macOS
+.DS_Store
+**/.DS_Store
+
+# Config locale Claude Code (ne pas publier)
+.claude/
+CLAUDE.md
+
+# Sous-projet avec son propre dépôt git
+photo-portfolio/
+
+# Dossiers privés / sensibles — NE JAMAIS publier sur ce repo public
+Impôt 2025 - Claude/
+Covéa - Maquettes/
+Design system/
+Index - logos/
+Tableau de bord - Github/
+
+# Fichiers de travail / brouillons
+inject-state1.js
+svg_escaped.txt
+state1-compact.svg
+*.zip
