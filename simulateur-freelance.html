@@ -165,7 +165,7 @@
         <div class="field">
           <label>TJM</label>
           <div class="input-wrap">
-            <input type="number" id="tjm" value="700" min="0" step="10" />
+            <input type="number" id="tjm" value="450" min="0" step="10" />
             <span class="unit">€</span>
           </div>
           <span class="hint">Taux journalier moyen</span>
@@ -236,7 +236,7 @@
       <div class="field" style="max-width:200px">
         <label>TJM</label>
         <div class="input-wrap">
-          <input type="number" id="tjm-precis" value="700" min="0" step="10" />
+          <input type="number" id="tjm-precis" value="450" min="0" step="10" />
           <span class="unit">€</span>
         </div>
         <span class="hint">Taux journalier moyen</span>
@@ -319,7 +319,7 @@
 const state = { acre: false, acreYear: 1, liberal: false };
 let activeTab = 'arrondi';
 const STORAGE_KEY = 'sf_v1';
-const DEFAULTS = { tjm: 700, jours: 2.5, remise: 0, tjmPrecis: 700 };
+const DEFAULTS = { tjm: 450, jours: 2.5, remise: 0, tjmPrecis: 450 };
 
 /* ── Persistance localStorage ── */
 function saveState() {
