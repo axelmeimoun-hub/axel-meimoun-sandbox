@@ -203,14 +203,34 @@ const COLORS = ['#1a1d2e', '#4a7b9d', '#7fb8d4', '#a8d4e6', '#cce8f0'];
 const COLORS_LABELS = ['Capital', 'Intérêts', 'Assurance', 'Garantie', 'Notaire'];
 
 function SliderField({ label, value, onChange, min, max, step, suffix = '', decimals = 0 }) {
-  const pct = ((value - min) / (max - min)) * 100;
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(String(value));
+
+  const pct = ((Math.min(max, Math.max(min, value)) - min) / (max - min)) * 100;
   const trackStyle = {
     background: `linear-gradient(to right, #1a1d2e ${pct}%, #e2e6f0 ${pct}%)`,
   };
 
+  // Pendant la saisie, on n'écrase pas le brouillon avec la valeur du parent
+  useEffect(() => {
+    if (!editing) setDraft(String(value));
+  }, [value, editing]);
+
   const handleInput = (e) => {
-    const v = parseFloat(e.target.value);
-    if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)));
+    const raw = e.target.value;
+    setDraft(raw);
+    // Mise à jour live des résultats si le texte est un nombre valide (sans borner)
+    const v = parseFloat(raw);
+    if (!isNaN(v)) onChange(v);
+  };
+
+  const handleBlur = () => {
+    setEditing(false);
+    let v = parseFloat(draft);
+    if (isNaN(v)) v = min;
+    v = Math.min(max, Math.max(min, v));
+    onChange(v);
+    setDraft(String(v));
   };
 
   return (
@@ -220,11 +240,14 @@ function SliderField({ label, value, onChange, min, max, step, suffix = '', deci
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <input
             type="number"
-            value={value}
+            value={editing ? draft : value}
             min={min}
             max={max}
             step={step}
+            onFocus={() => { setEditing(true); setDraft(String(value)); }}
             onChange={handleInput}
+            onBlur={handleBlur}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
             style={{ width: decimals > 0 ? 75 : 90 }}
           />
           {suffix && <span style={{ fontSize: 13, color: '#9ca3af', fontFamily: 'var(--font-mono)' }}>{suffix}</span>}
