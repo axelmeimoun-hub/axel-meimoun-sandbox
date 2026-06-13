@@ -50,10 +50,7 @@
       flex: 1;
     }
 
-    /* Header */
-    header {
-      margin-bottom: 48px;
-    }
+    header { margin-bottom: 48px; }
 
     .header-label {
       font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
@@ -85,30 +82,18 @@
       margin-top: 32px;
     }
 
-    /* Grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 24px;
     }
 
-    @media (max-width: 1024px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
+    @media (max-width: 1024px) { .grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .container {
-        padding: 32px 20px;
-      }
+      .grid { grid-template-columns: 1fr; }
+      .container { padding: 32px 20px; }
     }
 
-    /* Card */
     .card {
       background: var(--surface);
       border: 0.5px solid var(--border);
@@ -136,80 +121,36 @@
       position: relative;
     }
 
-    .card-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .card-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .card-preview-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
       background: #e8e4dc;
       font-family: var(--serif);
-      font-size: 40px;
-      font-weight: 400;
-      color: var(--muted);
-      letter-spacing: 0.02em;
+      font-size: 40px; font-weight: 400;
+      color: var(--muted); letter-spacing: 0.02em;
     }
 
     .card-body {
       padding: 16px 18px 18px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      flex: 1; display: flex; flex-direction: column; gap: 8px;
     }
 
-    .card-title {
-      font-family: var(--serif);
-      font-size: 18px;
-      font-weight: 400;
-      color: var(--text);
-      line-height: 1.2;
-    }
+    .card-title { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--text); line-height: 1.2; }
 
     .card-description {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      font-size: 13px; color: var(--muted); line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    .card-footer {
-      margin-top: auto;
-      padding-top: 12px;
-      display: flex;
-      justify-content: flex-end;
-    }
+    .card-footer { margin-top: auto; padding-top: 12px; display: flex; justify-content: flex-end; }
 
-    .card-footer-link {
-      font-size: 12px;
-      color: var(--hint);
-      font-weight: 400;
-      letter-spacing: 0.04em;
-      transition: color 0.15s;
-    }
+    .card-footer-link { font-size: 12px; color: var(--hint); font-weight: 400; letter-spacing: 0.04em; transition: color 0.15s; }
 
-    .card:hover .card-footer-link {
-      color: var(--text);
-    }
+    .card:hover .card-footer-link { color: var(--text); }
 
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 24px 32px 32px;
-      font-size: 12px;
-      color: var(--hint);
-      letter-spacing: 0.04em;
-    }
+    footer { text-align: center; padding: 24px 32px 32px; font-size: 12px; color: var(--hint); letter-spacing: 0.04em; }
   </style>
 </head>
 <body>
@@ -221,7 +162,6 @@
     <p class="header-subtitle">Une collection de projets et outils interactifs</p>
     <hr class="header-separator" />
   </header>
-
   <main>
     <div class="grid" id="grid"></div>
   </main>
@@ -265,7 +205,7 @@
     {
       title: "Bracket Coupe du Monde 2026",
       description: "Tracker de pronostics pour la Coupe du Monde 2026 avec gestion multi-profils, phase de groupes et tableau final.",
-      url: "https://axelmeimoun-hub.github.io/axel-meimoun-sandbox/worldcup2026.html",
+      url: "https://axelmeimoun-hub.github.io/axel-meimoun-sandbox/wc2026.html",
       image: "previews/worldcup2026.png",
       previewSvg: `<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
         <rect width="640" height="360" fill="#f7f5f2"/>
@@ -287,6 +227,7 @@
         <text x="320" y="322" font-family="ui-monospace,monospace" font-size="8" fill="#a8a49c" text-anchor="middle" letter-spacing="2.5">COUPE DU MONDE · 2026</text>
       </svg>`
     }
+    // Add more projects here as needed
   ];
 
   function renderCards() {
